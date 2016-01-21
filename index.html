@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Llista de minerals JSON</title>
+</head>
+<body>
+<form name="formu" >
+<select id="mostrar" onchange="mineral(formu.mostrar.value);"></select>
+<br />
+</form>
+<div id="pedra"></div>
+<script>
+function mineral(m)
+{
+	var http_request = new XMLHttpRequest();
+	var url = "http://localhost/oracle/XMAS/minelmas.php?op="+m; // URL que envia el fitxer JSON de l'exemple
+	
+	// patró JSON del Webservice de codispostal de Geonames
+	// {"postalcodes":[{"adminName2":"Tarragona","adminCode2":"T","postalcode":"43205","adminCode1":"CT","countryCode":"ES","lng":1.10687255859375,"placeName":"Reus","lat":41.1561203774784,"adminName1":"Cataluna"}]}
+	
+	// Descarrega les dades JSON del servidor.
+	http_request.onreadystatechange = handle_json;
+	http_request.open("GET", url, true);
+	http_request.send(null);
+	function handle_json() {
+		if (http_request.readyState == 4) {
+			if (http_request.status == 200) {
+				var json_data = http_request.responseText; // l'objecte json_data guarda les dades rebudes en format JSON
+				//var the_object = eval("(" + json_data + ")"); // guarda les dades en format objecte
+				var json = JSON.parse(json_data); // parseja les dades per si volem accedir a un valor concret ja separat
+				console.log(json);
+				if (m=="llista"){
+					var res = "";
+					for (var x=0;x<json.length;x++){
+						res = res+"<option value=\""+json[x]+"\">"+json[x]+"</option>";
+					}
+					document.getElementById('mostrar').innerHTML = res ;
+				}
+				else{
+					var res = "El mineral escollit és "+json["nom"]+" amb l'identificador "+json["id"]+" i la seva duresa i densitat són "+json["duresa"]+"/"+json["densitat"];
+					document.getElementById('pedra').innerHTML = res ;
+				}
+			} else {
+				alert("Ocurrio un problema con la URL."); // Si no carrega mostra missatge d'error
+			}
+			http_request = null;
+		}
+	}
+}
+mineral("llista");
+</script>
+</body>
+</html>
